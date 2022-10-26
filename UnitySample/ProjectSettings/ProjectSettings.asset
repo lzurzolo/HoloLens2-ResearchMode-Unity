@@ -12,8 +12,8 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: Wenhao
-  productName: HL2ResearchModeUnitySample
+  companyName: NJIT
+  productName: PositionAndRotation
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -593,16 +593,16 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Template3D
+  metroPackageName: PositionAndRotation
   metroPackageVersion: 1.0.0.0
   metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
-  metroCertificateSubject: Wenhao
-  metroCertificateIssuer: Wenhao
-  metroCertificateNotAfter: 800884053b79d801
+  metroCertificateSubject: NJIT
+  metroCertificateIssuer: NJIT
+  metroCertificateNotAfter: 80dc17d7c3fbd901
   metroApplicationDescription: Template_3D
   wsaImages: {}
-  metroTileShortName: HL2ResearchModeUnitySample
+  metroTileShortName: PositionAndRotation
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0

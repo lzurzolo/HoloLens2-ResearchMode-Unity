@@ -5,7 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/PointCloudSample.unity
     guid: b2ea44247999fe846983588a46fa8ad7
+  - enabled: 1
+    path: Assets/Scenes/AR-BodyWork.unity
+    guid: 827efcfe8e62a7248b3e173eab9c9f7c
   m_configObjects: {}

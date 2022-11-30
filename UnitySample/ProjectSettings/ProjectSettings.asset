@@ -599,7 +599,7 @@ PlayerSettings:
   metroCertificatePassword: 
   metroCertificateSubject: NJIT
   metroCertificateIssuer: NJIT
-  metroCertificateNotAfter: 80dc17d7c3fbd901
+  metroCertificateNotAfter: 809b4876df23da01
   metroApplicationDescription: Template_3D
   wsaImages: {}
   metroTileShortName: PositionAndRotation

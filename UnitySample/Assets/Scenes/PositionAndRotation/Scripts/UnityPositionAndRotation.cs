@@ -18,15 +18,15 @@ public class UnityPositionAndRotation : MonoBehaviour
     private void Start()
     {
         _camera = Camera.main;
-        Instantiate(startingMarker, _camera.transform.position, _camera.transform.rotation);
+        //Instantiate(startingMarker, _camera.transform.position, _camera.transform.rotation);
     }
 
     private void Update()
     {
-        var transform = _camera.transform;
+        //var transform = _camera.transform;
 
-        currentRotation = transform.rotation;
-        currentEulerAngles = currentRotation.eulerAngles;
-        currentPosition = transform.position;
+        //currentRotation = transform.rotation;
+        //currentEulerAngles = currentRotation.eulerAngles;
+        //currentPosition = transform.position;
     }
 }

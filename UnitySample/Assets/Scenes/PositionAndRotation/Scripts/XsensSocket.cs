@@ -37,7 +37,7 @@ public class XsensSocket : MonoBehaviour
         uint len = reader.UnconsumedBufferLength;
         string msg = reader.ReadString(len);
 
-        if(msg.Contains("CaptureStart")) director.StartXsensRecording();
+        //if(msg.Contains("CaptureStart")) director.StartXsensRecording();
 
         string remoteHost = args.RemoteAddress.DisplayName;
         reader.Dispose();

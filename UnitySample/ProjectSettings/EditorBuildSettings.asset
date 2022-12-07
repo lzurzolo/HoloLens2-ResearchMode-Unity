@@ -9,6 +9,6 @@ EditorBuildSettings:
     path: Assets/Scenes/PointCloudSample.unity
     guid: b2ea44247999fe846983588a46fa8ad7
   - enabled: 1
-    path: Assets/Scenes/AR-BodyWork.unity
-    guid: 827efcfe8e62a7248b3e173eab9c9f7c
+    path: Assets/Scenes/PositionAndRotation/PositionAndRotation.unity
+    guid: 90952bdabf75a55488d54da70d66e063
   m_configObjects: {}

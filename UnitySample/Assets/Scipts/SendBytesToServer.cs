@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 #if WINDOWS_UWP
 using Windows.Networking.Sockets;
@@ -37,9 +38,12 @@ public class SendBytesToServer : MonoBehaviour
 
         try
         {
+            var hostFromFile = File.ReadAllText(Application.persistentDataPath + @"\host.txt");
+            var portFromFile = File.ReadAllText(Application.persistentDataPath + @"\port.txt");
+
             socket = new StreamSocket();
-            var hostName = new Windows.Networking.HostName(hostIPAddress);
-            await socket.ConnectAsync(hostName, port);
+            var hostName = new Windows.Networking.HostName(hostFromFile);
+            await socket.ConnectAsync(hostName, portFromFile);
             dw = new DataWriter(socket.OutputStream);
             dr = new DataReader(socket.InputStream);
             dr.InputStreamOptions = InputStreamOptions.Partial;
@@ -129,20 +133,20 @@ public class SendBytesToServer : MonoBehaviour
             UInt32 read = await dr.LoadAsync(count);
             if(read != count)
             {
-                debugText.text = "Count is 4, read is: " + read; 
+                //debugText.text = "Count is 4, read is: " + read; 
                 dr.ReadBuffer(read);
                 return;
             }
             var size = dr.ReadUInt32();
             if(size == 0)
             {
-                debugText.text = "Read a size of 0";
+                //debugText.text = "Read a size of 0";
                 return;
             }
             read = await dr.LoadAsync(size);
             if(read != size)
             {
-                debugText.text = "read is: " + read + "size is: " + size;
+                //debugText.text = "read is: " + read + "size is: " + size;
                 dr.ReadString(read);
                 return;
             }

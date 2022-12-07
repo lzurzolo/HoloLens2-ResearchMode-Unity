@@ -114,30 +114,26 @@ public class PVCameraCapture : MonoBehaviour
                     {
                         var landmark = landmarks.landmarks[i];
                         var imagePos = new Vector2(landmark.x, landmark.y);
-                        var imagePosProjected = (imagePos * 2) - new Vector2(1, 1);
+
+                        Vector2 imagePosProjected = new Vector2(2 * imagePos.x - 1, 1 - 2 * imagePos.y);
 
                         var cameraSpacePos = UnProjectVector(camera.projectionMatrix, new Vector3(imagePosProjected.x, imagePosProjected.y, 1));
+
                         var unityCamToWorld = camera.cameraToWorldMatrix;
+                        Debug.Log(unityCamToWorld);
                         var worldSpaceBoxPos = unityCamToWorld.MultiplyPoint(cameraSpacePos);
 
                         joints[i].transform.position = worldSpaceBoxPos;
-
-                        if(i == 0)
-                        {
-                            debugText.text = "Frame: " + _imageCount + Environment.NewLine + /*"Sphere Position: " + debugSphere.transform.position.x + ", " + debugSphere.transform.position.y + ", " + debugSphere.transform.position.z + Environment.NewLine +*/
-                                "Joint Position: " + joints[i].transform.position.x + ", " + joints[i].transform.position.y + ", " + joints[i].transform.position.z;
-                            _imageCount += 1;
-                        }
                     }
                 }
                 else
                 {
-                    debugText.text = "JSONString is empty";
+                    //debugText.text = "JSONString is empty";
                 }
             }
             else
             {
-                debugText.text = "OutJSONS count: " + sendBytesToServer.outJsons.Count;
+                //debugText.text = "OutJSONS count: " + sendBytesToServer.outJsons.Count;
             }
             _currentlyProcessingFrame = false;
         }

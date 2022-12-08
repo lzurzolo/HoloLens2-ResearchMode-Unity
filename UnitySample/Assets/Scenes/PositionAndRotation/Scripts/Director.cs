@@ -26,7 +26,7 @@ public class Director : MonoBehaviour
     public void StartXsensRecording()
     {
 #if WINDOWS_UWP
-        xsensSocket.StartXsensRecording();
+        //xsensSocket.StartXsensRecording();
 #endif
         _isRecording = true;
         imuOutput.StartLogging();
@@ -36,6 +36,9 @@ public class Director : MonoBehaviour
 
     public void StopXsensRecording()
     {
+#if WINDOWS_UWP
+        //xsensSocket.StopXsensRecording();
+#endif
         _isRecording = false;
         imuOutput.EndLogging();
         endButton.SetActive(false);

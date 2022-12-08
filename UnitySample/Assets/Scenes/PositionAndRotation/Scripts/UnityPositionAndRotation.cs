@@ -23,10 +23,10 @@ public class UnityPositionAndRotation : MonoBehaviour
 
     private void Update()
     {
-        //var transform = _camera.transform;
+        var transform = _camera.transform;
 
-        //currentRotation = transform.rotation;
-        //currentEulerAngles = currentRotation.eulerAngles;
-        //currentPosition = transform.position;
+        currentRotation = transform.rotation;
+        currentEulerAngles = currentRotation.eulerAngles;
+        currentPosition = transform.position;
     }
 }

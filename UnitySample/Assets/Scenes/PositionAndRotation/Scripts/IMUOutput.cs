@@ -55,7 +55,7 @@ public class IMUOutput : MonoBehaviour
 
     private void Update()
     {
-        //UpdateDialogBox();
+        UpdateDialogBox();
     }
 
     private void UpdateDialogBox()

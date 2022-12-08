@@ -26,7 +26,7 @@ public class IMUBackend : MonoBehaviour
 
     private void Start()
     {
-#if ENABLE_WINMD_SUPPORT
+#if WINDOWS_UWP
         _researchMode = new HL2ResearchMode();
         _researchMode.InitializeAccelSensor();
         _researchMode.InitializeGyroSensor();
@@ -40,7 +40,7 @@ public class IMUBackend : MonoBehaviour
 
     private void LateUpdate()
     {
-#if ENABLE_WINMD_SUPPORT
+#if WINDOWS_UWP
         if(_researchMode.AccelSampleUpdated())
         {
             _accelerometerSample = _researchMode.GetAccelSample();

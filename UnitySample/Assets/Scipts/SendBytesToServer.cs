@@ -69,57 +69,6 @@ public class SendBytesToServer : MonoBehaviour
         socket?.Dispose();
         _connected = false;
     }
-    
-    bool lastMessageSent = true;
-    public async void SendUINT16Async(ushort[] data1, ushort[] data2)
-    {
-        if (!lastMessageSent) return;
-        lastMessageSent = false;
-        try
-        {
-            // Write header
-            dw.WriteString("s"); // header "s" stands for it is ushort array (uint16)
-
-            // Write Length
-            dw.WriteInt32(data1.Length + data2.Length);
-
-            // Write actual data
-            dw.WriteBytes(UINT16ToBytes(data1));
-            dw.WriteBytes(UINT16ToBytes(data2));
-
-            // Send out
-            await dw.StoreAsync();
-            await dw.FlushAsync();
-        }
-        catch (Exception ex)
-        {
-            SocketErrorStatus webErrorStatus = SocketError.GetStatus(ex.GetBaseException().HResult);
-            Debug.Log(webErrorStatus.ToString() != "Unknown" ? webErrorStatus.ToString() : ex.Message);
-        }
-        lastMessageSent = true;
-    }
-
-    public async void PingRedis()
-    {
-        dw.WriteString("ping \"Hello from the Hololens!\"\r\n");
-        await dw.StoreAsync();
-        await dw.FlushAsync();
-        var recv = await dr.LoadAsync(64);
-        Debug.Log(dr.ReadString(recv));
-    }
-
-    public async void Publish(byte[] data1, byte[] data2)
-    {
-        byte[] combined = new byte[data1.Length + data2.Length];
-        System.Buffer.BlockCopy(data1, 0, combined, 0, data1.Length);
-        System.Buffer.BlockCopy(data2, 0, combined, data1.Length, data2.Length);
-        dw.WriteBytes(combined);
-        await dw.StoreAsync();
-        await dw.FlushAsync();
-        await dr.LoadAsync(15665);
-        var input = dr.ReadString(15665);
-        Debug.Log(input);
-    }
 
     public async void Publish(int length, byte[] data)
     {
@@ -157,14 +106,6 @@ public class SendBytesToServer : MonoBehaviour
         {
 
         }
-    }
-    
+    } 
 #endif
-
-    byte[] UINT16ToBytes(ushort[] data)
-    {
-        byte[] ushortInBytes = new byte[data.Length * sizeof(ushort)];
-        System.Buffer.BlockCopy(data, 0, ushortInBytes, 0, ushortInBytes.Length);
-        return ushortInBytes;
-    }
 }

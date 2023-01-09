@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -18,6 +19,7 @@ public class PVCameraCapture : MonoBehaviour
     public TMPro.TMP_Text debugText;
     public GameObject debugSphere;
     private int _imageCount;
+    private IEnumerator _processLandmarks;
 
     [System.Serializable]
     public class Landmarks
@@ -42,6 +44,7 @@ public class PVCameraCapture : MonoBehaviour
         _readyToCaptureFrames = false;
         currentLandmarks = new List<Landmark>();
         _imageCount = 0;
+        _processLandmarks = ProcessLandmarkQueue();
     }
     private void Start()
     {
@@ -50,12 +53,50 @@ public class PVCameraCapture : MonoBehaviour
         sendBytesToServer.StartConnection();
 #endif
         camera = GetComponent<Camera>();
+        StartCoroutine(_processLandmarks);
     }
 
     private void Update()
     {
         if (!_readyToCaptureFrames) return;
         if (!_currentlyProcessingFrame) _photoCapture.TakePhotoAsync(OnCapturedPhotoToMemory);
+    }
+
+    private IEnumerator ProcessLandmarkQueue()
+    {
+        while(true)
+        {
+            yield return null;
+            if (sendBytesToServer.outJsons.TryDequeue(out string jsonStr))
+            {
+                if (jsonStr != string.Empty)
+                {
+                    string newJson = "{ \"landmarks\": " + jsonStr + "}";
+                    var landmarks = JsonUtility.FromJson<Landmarks>(newJson);
+                    for (int i = 0; i < landmarks.landmarks.Length; i++)
+                    {
+                        var landmark = landmarks.landmarks[i];
+                        var imagePos = new Vector2(landmark.x, landmark.y);
+
+                        Vector2 imagePosProjected = new Vector2(2 * imagePos.x - 1, 1 - 2 * imagePos.y);
+
+                        var cameraSpacePos = UnProjectVector(camera.projectionMatrix, new Vector3(imagePosProjected.x, imagePosProjected.y, 1));
+
+                        var unityCamToWorld = camera.cameraToWorldMatrix;
+                        Debug.Log(unityCamToWorld);
+                        var worldSpaceBoxPos = unityCamToWorld.MultiplyPoint(cameraSpacePos);
+
+                        joints[i].transform.position = worldSpaceBoxPos;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+            }
+        }
+
+        yield return null;
     }
 
     #region "Camera Callbacks"
@@ -104,37 +145,7 @@ public class PVCameraCapture : MonoBehaviour
 #if WINDOWS_UWP
             sendBytesToServer.Publish(size, bytes); 
 #endif
-            if (sendBytesToServer.outJsons.TryDequeue(out string jsonStr))
-            {
-                if (jsonStr != string.Empty)
-                {
-                    string newJson = "{ \"landmarks\": " + jsonStr + "}";
-                    var landmarks = JsonUtility.FromJson<Landmarks>(newJson);
-                    for(int i = 0; i < landmarks.landmarks.Length; i++)
-                    {
-                        var landmark = landmarks.landmarks[i];
-                        var imagePos = new Vector2(landmark.x, landmark.y);
 
-                        Vector2 imagePosProjected = new Vector2(2 * imagePos.x - 1, 1 - 2 * imagePos.y);
-
-                        var cameraSpacePos = UnProjectVector(camera.projectionMatrix, new Vector3(imagePosProjected.x, imagePosProjected.y, 1));
-
-                        var unityCamToWorld = camera.cameraToWorldMatrix;
-                        Debug.Log(unityCamToWorld);
-                        var worldSpaceBoxPos = unityCamToWorld.MultiplyPoint(cameraSpacePos);
-
-                        joints[i].transform.position = worldSpaceBoxPos;
-                    }
-                }
-                else
-                {
-                    //debugText.text = "JSONString is empty";
-                }
-            }
-            else
-            {
-                //debugText.text = "OutJSONS count: " + sendBytesToServer.outJsons.Count;
-            }
             _currentlyProcessingFrame = false;
         }
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Windows.WebCam;
+using System.Threading.Tasks;
 
 public class PVCameraCapture : MonoBehaviour
 {
@@ -143,9 +144,8 @@ public class PVCameraCapture : MonoBehaviour
             int size = bytes.Length;
 
 #if WINDOWS_UWP
-            sendBytesToServer.Publish(size, bytes); 
+            await Task.Run(() => sendBytesToServer.Publish(size,bytes));
 #endif
-
             _currentlyProcessingFrame = false;
         }
     }

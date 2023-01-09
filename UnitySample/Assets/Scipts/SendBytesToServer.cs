@@ -70,7 +70,7 @@ public class SendBytesToServer : MonoBehaviour
         _connected = false;
     }
 
-    public async void Publish(int length, byte[] data)
+    public async Task Publish(int length, byte[] data)
     {
         try
         {

@@ -82,20 +82,17 @@ public class SendBytesToServer : MonoBehaviour
             UInt32 read = await dr.LoadAsync(count);
             if(read != count)
             {
-                //debugText.text = "Count is 4, read is: " + read; 
                 dr.ReadBuffer(read);
                 return;
             }
             var size = dr.ReadUInt32();
             if(size == 0)
             {
-                //debugText.text = "Read a size of 0";
                 return;
             }
             read = await dr.LoadAsync(size);
             if(read != size)
             {
-                //debugText.text = "read is: " + read + "size is: " + size;
                 dr.ReadString(read);
                 return;
             }

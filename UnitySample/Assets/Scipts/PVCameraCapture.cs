@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Windows.WebCam;
@@ -11,7 +12,6 @@ public class PVCameraCapture : MonoBehaviour
     public SendBytesToServer sendBytesToServer;
     private PhotoCapture _photoCapture;
     private bool _readyToCaptureFrames;
-    private bool _currentlyProcessingFrame;
     public GameObject skeleton;
     public List<GameObject> joints;
     public Camera camera;
@@ -19,8 +19,9 @@ public class PVCameraCapture : MonoBehaviour
     private const int IMAGE_HEIGHT = 720;
     public TMPro.TMP_Text debugText;
     public GameObject debugSphere;
-    private int _imageCount;
     private IEnumerator _processLandmarks;
+    private IEnumerator _publishPhotos;
+    private ConcurrentQueue<List<byte>> _photosToBeProcessed;
 
     [System.Serializable]
     public class Landmarks
@@ -41,11 +42,11 @@ public class PVCameraCapture : MonoBehaviour
 
     private void Awake()
     {
-        _currentlyProcessingFrame = false;
         _readyToCaptureFrames = false;
         currentLandmarks = new List<Landmark>();
-        _imageCount = 0;
         _processLandmarks = ProcessLandmarkQueue();
+        _publishPhotos = PublishPhoto();
+        _photosToBeProcessed = new ConcurrentQueue<List<byte>>();
     }
     private void Start()
     {
@@ -55,12 +56,31 @@ public class PVCameraCapture : MonoBehaviour
 #endif
         camera = GetComponent<Camera>();
         StartCoroutine(_processLandmarks);
+        StartCoroutine(_publishPhotos);
     }
 
     private void Update()
     {
         if (!_readyToCaptureFrames) return;
-        if (!_currentlyProcessingFrame) _photoCapture.TakePhotoAsync(OnCapturedPhotoToMemory);
+        _photoCapture.TakePhotoAsync(OnCapturedPhotoToMemory);
+    }
+
+    private IEnumerator PublishPhoto()
+    {
+        while(true)
+        {
+            yield return null;
+            if(_photosToBeProcessed.TryDequeue(out List<byte> photo))
+            {
+                var bytes = photo.ToArray();
+                int size = bytes.Length;
+#if WINDOWS_UWP
+            sendBytesToServer.Publish(size,bytes);
+#endif
+            }
+        }
+
+        yield return null;
     }
 
     private IEnumerator ProcessLandmarkQueue()
@@ -84,7 +104,6 @@ public class PVCameraCapture : MonoBehaviour
                         var cameraSpacePos = UnProjectVector(camera.projectionMatrix, new Vector3(imagePosProjected.x, imagePosProjected.y, 1));
 
                         var unityCamToWorld = camera.cameraToWorldMatrix;
-                        Debug.Log(unityCamToWorld);
                         var worldSpaceBoxPos = unityCamToWorld.MultiplyPoint(cameraSpacePos);
 
                         joints[i].transform.position = worldSpaceBoxPos;
@@ -137,16 +156,9 @@ public class PVCameraCapture : MonoBehaviour
     {
         if (result.success)
         {
-            _currentlyProcessingFrame = true;
             List<byte> imageBufferList = new List<byte>();
             photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);
-            var bytes = imageBufferList.ToArray();
-            int size = bytes.Length;
-
-#if WINDOWS_UWP
-            await Task.Run(() => sendBytesToServer.Publish(size,bytes));
-#endif
-            _currentlyProcessingFrame = false;
+            _photosToBeProcessed.Enqueue(imageBufferList);
         }
     }
 

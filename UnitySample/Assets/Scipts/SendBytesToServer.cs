@@ -30,6 +30,7 @@ public class SendBytesToServer : MonoBehaviour
 
 #if WINDOWS_UWP
     StreamSocket socket = null;
+    StreamSocket inputSocket = null;
     public DataWriter dw;
     public DataReader dr;
     public async void StartConnection()
@@ -42,10 +43,12 @@ public class SendBytesToServer : MonoBehaviour
             var portFromFile = File.ReadAllText(Application.persistentDataPath + @"\port.txt");
 
             socket = new StreamSocket();
+            inputSocket = new StreamSocket();
             var hostName = new Windows.Networking.HostName(hostFromFile);
             await socket.ConnectAsync(hostName, portFromFile);
+            await inputSocket.ConnectAsync(hostName, "4002");
             dw = new DataWriter(socket.OutputStream);
-            dr = new DataReader(socket.InputStream);
+            dr = new DataReader(inputSocket.InputStream);
             dr.InputStreamOptions = InputStreamOptions.Partial;
             _connected = true;
         }

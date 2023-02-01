@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Windows.WebCam;
 using System.Threading.Tasks;
+using System.Net;
 
 public class PVCameraCapture : MonoBehaviour
 {
@@ -42,7 +43,7 @@ public class PVCameraCapture : MonoBehaviour
 
     private void Awake()
     {
-        _readyToCaptureFrames = false;
+        //_readyToCaptureFrames = false;
         currentLandmarks = new List<Landmark>();
         _processLandmarks = ProcessLandmarkQueue();
         _publishPhotos = PublishPhoto();
@@ -50,7 +51,7 @@ public class PVCameraCapture : MonoBehaviour
     }
     private void Start()
     {
-        PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
+        //PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
 #if WINDOWS_UWP
         sendBytesToServer.StartConnection();
 #endif
@@ -61,8 +62,8 @@ public class PVCameraCapture : MonoBehaviour
 
     private void Update()
     {
-        if (!_readyToCaptureFrames) return;
-        _photoCapture.TakePhotoAsync(OnCapturedPhotoToMemory);
+        //if (!_readyToCaptureFrames) return;
+        //_photoCapture.TakePhotoAsync(OnCapturedPhotoToMemory);
     }
 
     private IEnumerator PublishPhoto()
@@ -70,14 +71,16 @@ public class PVCameraCapture : MonoBehaviour
         while(true)
         {
             yield return null;
-            if(_photosToBeProcessed.TryDequeue(out List<byte> photo))
-            {
-                var bytes = photo.ToArray();
-                int size = bytes.Length;
+            //if(_photosToBeProcessed.TryDequeue(out List<byte> photo))
+            //{
+            //var bytes = photo.ToArray();
+            //int size = bytes.Length;
 #if WINDOWS_UWP
-            sendBytesToServer.Publish(size,bytes);
+            //sendBytesToServer.Publish(dummyBytes.Length,dummyBytes);
+            Task task = sendBytesToServer.GetLandmarksFromServer();
+            yield return new WaitUntil(() => task.IsCompleted);
 #endif
-            }
+            //}
         }
 
         yield return null;

@@ -20,19 +20,11 @@ public class SendBytesToServer : MonoBehaviour
 
     public string outJson;
     public ConcurrentQueue<string> outJsons;
-    public TMPro.TMP_Text debugText;
-    private bool _isConnected;
 
-    private void Awake()
-    {
-        _isConnected = false;
-    }
     private void Start()
     {
         outJsons = new ConcurrentQueue<string>();
     }
-
-    private bool _connected = false;
 
 #if WINDOWS_UWP
     StreamSocket socket = null;
@@ -48,16 +40,12 @@ public class SendBytesToServer : MonoBehaviour
             var hostFromFile = File.ReadAllText(Application.persistentDataPath + @"\host.txt");
             var portFromFile = File.ReadAllText(Application.persistentDataPath + @"\port.txt");
 
-            //socket = new StreamSocket();
             inputSocket = new StreamSocket();
             var hostName = new Windows.Networking.HostName(hostFromFile);
-            //await socket.ConnectAsync(hostName, portFromFile);
             await inputSocket.ConnectAsync(hostName, "4002");
             dw = new DataWriter(inputSocket.OutputStream);
             dr = new DataReader(inputSocket.InputStream);
             dr.InputStreamOptions = InputStreamOptions.Partial;
-
-            _isConnected = true;
         }
         catch(Exception ex)
         {
@@ -68,51 +56,9 @@ public class SendBytesToServer : MonoBehaviour
     
     private void StopConnection()
     {
-        //dw?.DetachStream();
-        //dw?.Dispose();
-        //dw = null;
-
         dr?.DetachStream();
         dr?.Dispose();
         dr = null;
-
-        //socket?.Dispose();
-        _connected = false;
-    }
-
-    public async Task Publish(int length, byte[] data)
-    {
-        try
-        {
-            dw.WriteInt32(length);
-            dw.WriteBytes(data);
-            await dw.StoreAsync();
-            await dw.FlushAsync();
-            UInt32 count = 4;
-            UInt32 read = await dr.LoadAsync(count);
-            if(read != count)
-            {
-                dr.ReadBuffer(read);
-                return;
-            }
-            var size = dr.ReadUInt32();
-            if(size == 0)
-            {
-                return;
-            }
-            read = await dr.LoadAsync(size);
-            if(read != size)
-            {
-                dr.ReadString(read);
-                return;
-            }
-            outJson = dr.ReadString(size);
-            outJsons.Enqueue(outJson);
-        }
-        catch (Exception ex)
-        {
-
-        }
     }
     
     public async Task GetLandmarksFromServer()
@@ -121,6 +67,7 @@ public class SendBytesToServer : MonoBehaviour
         {
             // ack server
             dw.WriteInt32(42);
+
             await dw.StoreAsync();
             await dw.FlushAsync();
 
@@ -140,11 +87,6 @@ public class SendBytesToServer : MonoBehaviour
             }
             var totalRead = await dr.LoadAsync(size);
             Debug.Log("Read " + totalRead);
-            //if(read != size)
-            //{
-            //    dr.ReadString(read);
-            //    return;
-            //}
 
             while(totalRead < size)
             {
@@ -155,7 +97,6 @@ public class SendBytesToServer : MonoBehaviour
             byte[] buff = new byte[size];
             dr.ReadBytes(buff);
             
-            //outJson = dr.ReadString(size);
             outJson = Encoding.UTF8.GetString(buff, 0, buff.Length);
             Debug.Log(outJson);
             outJsons.Enqueue(outJson);
@@ -163,9 +104,6 @@ public class SendBytesToServer : MonoBehaviour
         catch (Exception ex)
         {
             Debug.Log("EXCEPTION " + ex.Message);
-            //dw.WriteInt32(42);
-            //await dw.StoreAsync();
-            //await dw.FlushAsync();
         }
     }
 #endif
